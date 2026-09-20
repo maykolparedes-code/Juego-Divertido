@@ -9,6 +9,9 @@ on:
       - ".github/workflows/build-godot-apk.yml"
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 env:
   GODOT_VERSION: 4.3-stable
   GODOT_VERSION_DIR: 4.3.stable
@@ -74,3 +77,19 @@ jobs:
           name: aventura-3d-debug-apk
           path: aventura-3d/build/aventura-3d.apk
           if-no-files-found: error
+
+      # Los artefactos normales de Actions se sirven desde Azure Blob
+      # Storage, que la política de red de algunos entornos bloquea. Un
+      # Release de GitHub sirve sus assets desde
+      # release-assets.githubusercontent.com, que sí es alcanzable, así que
+      # publicamos también ahí para poder descargar el APK directamente.
+      - name: Publish APK as a GitHub Release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: aventura3d-build-${{ github.run_number }}
+          name: "Aventura 3D - build de depuración #${{ github.run_number }}"
+          body: |
+            APK de depuración generado automáticamente desde el commit ${{ github.sha }}.
+            No es una versión de Play Store: es solo para probar en tu dispositivo.
+          prerelease: true
+          files: aventura-3d/build/aventura-3d.apk

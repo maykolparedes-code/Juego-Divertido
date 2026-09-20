@@ -1,0 +1,12 @@
+# Caché de importación/editor de Godot: se regenera sola al abrir el
+# proyecto, no debe versionarse.
+.godot/
+
+# Exportaciones locales
+/export/
+*.apk
+*.aab
+
+# Keystores de firma: nunca subir tu clave real al repositorio.
+*.keystore
+*.jks

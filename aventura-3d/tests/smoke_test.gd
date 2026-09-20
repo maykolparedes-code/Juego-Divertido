@@ -33,15 +33,30 @@ func _run_impl() -> void:
 	var gate: Node3D = world.get_node_or_null("Gate")
 	var npc: Node = world.get_node_or_null("NPC")
 	var dialogue_box: Node = world.get_node_or_null("DialogueBox")
+	var player: Node = world.get_node_or_null("Player")
+	var touch_controls: Node = world.get_node_or_null("TouchControls")
 
 	_check(hud != null, "El nodo HUD existe en World.tscn")
 	_check(gate != null, "El nodo Gate existe en World.tscn")
 	_check(npc != null, "El nodo NPC existe en World.tscn")
 	_check(dialogue_box != null, "El nodo DialogueBox existe en World.tscn")
+	_check(player != null, "El nodo Player existe en World.tscn")
+	_check(touch_controls != null, "El nodo TouchControls existe en World.tscn")
 
-	if hud == null or gate == null or npc == null or dialogue_box == null:
+	if hud == null or gate == null or npc == null or dialogue_box == null or player == null or touch_controls == null:
 		_finish()
 		return
+
+	# Regresión: Player aparece antes que TouchControls en World.tscn, así que
+	# en su primer _ready() el grupo "touch_controls" todavía está vacío. Si
+	# la búsqueda de TouchControls solo ocurriera una vez en _ready() (en vez
+	# de reintentarse hasta encontrarlo), el jugador quedaría sordo a todo
+	# input táctil para siempre: exactamente el bug que se reportó jugando en
+	# un dispositivo real.
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	_check(player.get("_touch_controls") == touch_controls,
+		"Player encuentra y se conecta a TouchControls aunque este se declare después en la escena")
 
 	var objective_label: Label = hud.get_node("MarginContainer/VBoxContainer/ObjectiveLabel")
 	var crystal_label: Label = hud.get_node("MarginContainer/VBoxContainer/CrystalLabel")

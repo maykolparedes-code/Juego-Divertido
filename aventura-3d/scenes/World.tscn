@@ -12,10 +12,13 @@
 [ext_resource type="PackedScene" path="res://scenes/UI/TouchControls.tscn" id="10"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
-sky_top_color = Color(0.35, 0.55, 0.85, 1)
-sky_horizon_color = Color(0.75, 0.82, 0.9, 1)
-ground_bottom_color = Color(0.2, 0.2, 0.2, 1)
-ground_horizon_color = Color(0.75, 0.82, 0.9, 1)
+sky_top_color = Color(0.22, 0.42, 0.78, 1)
+sky_horizon_color = Color(0.86, 0.78, 0.68, 1)
+sky_curve = 0.15
+ground_bottom_color = Color(0.25, 0.22, 0.2, 1)
+ground_horizon_color = Color(0.86, 0.78, 0.68, 1)
+ground_curve = 0.15
+sun_angle_max = 30.0
 
 [sub_resource type="Sky" id="Sky_1"]
 sky_material = SubResource("ProceduralSkyMaterial_1")
@@ -23,12 +26,22 @@ sky_material = SubResource("ProceduralSkyMaterial_1")
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 2
 sky = SubResource("Sky_1")
+ambient_light_source = 3
+ambient_light_sky_contribution = 0.8
+glow_enabled = true
+glow_intensity = 0.9
+glow_bloom = 0.15
+glow_hdr_threshold = 1.0
+fog_enabled = true
+fog_light_color = Color(0.82, 0.76, 0.68, 1)
+fog_density = 0.009
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_Ground"]
 size = Vector2(40, 40)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_Ground"]
-albedo_color = Color(0.3, 0.55, 0.28, 1)
+albedo_color = Color(0.35, 0.58, 0.3, 1)
+roughness = 0.9
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_Ground"]
 size = Vector3(40, 1, 40)
@@ -37,7 +50,8 @@ size = Vector3(40, 1, 40)
 size = Vector2(12, 8)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_Temple"]
-albedo_color = Color(0.55, 0.52, 0.5, 1)
+albedo_color = Color(0.58, 0.54, 0.5, 1)
+roughness = 0.75
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_Temple"]
 size = Vector3(12, 1, 8)
@@ -65,6 +79,8 @@ environment = SubResource("Environment_1")
 [node name="Sun" type="DirectionalLight3D" parent="."]
 position = Vector3(0, 10, 0)
 rotation_degrees = Vector3(-50, -30, 0)
+light_color = Color(1, 0.95, 0.85, 1)
+light_energy = 1.15
 shadow_enabled = true
 
 [node name="Ground" type="StaticBody3D" parent="."]

@@ -38,12 +38,26 @@ func _ready() -> void:
 	_left_leg = visuals.get_node("LeftLegPivot")
 	_right_leg = visuals.get_node("RightLegPivot")
 
+	_connect_touch_controls()
+
+## Busca TouchControls de forma perezosa (no solo en _ready) porque el orden
+## en que Godot llama a _ready() entre nodos hermanos sigue el orden de
+## declaración en la escena: Player aparece antes que TouchControls en
+## World.tscn, así que en _ready() del Player, TouchControls todavía no
+## existe en el grupo "touch_controls". Buscarlo en cada frame hasta
+## encontrarlo evita depender de ese orden (y de que nadie lo cambie).
+func _connect_touch_controls() -> void:
+	if _touch_controls != null:
+		return
 	_touch_controls = get_tree().get_first_node_in_group("touch_controls")
 	if _touch_controls:
 		_touch_controls.look_delta.connect(_on_look_delta)
 		_touch_controls.jump_pressed.connect(_on_jump_pressed)
 
 func _physics_process(delta: float) -> void:
+	if _touch_controls == null:
+		_connect_touch_controls()
+
 	if global_position.y < RESPAWN_Y:
 		_respawn()
 		return
@@ -70,7 +84,7 @@ func _physics_process(delta: float) -> void:
 	if is_moving:
 		velocity.x = direction.x * MOVE_SPEED
 		velocity.z = direction.z * MOVE_SPEED
-		var target_angle := atan2(direction.x, direction.z)
+		var target_angle := atan2(-direction.x, -direction.z)
 		visuals.rotation.y = lerp_angle(visuals.rotation.y, target_angle, ROTATION_SPEED * delta)
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, MOVE_SPEED * delta * 4.0)

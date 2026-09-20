@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Juego Divertido</string>
+
+    <string name="menu_title">Juego Divertido</string>
+    <string name="menu_play">Jugar</string>
+    <string name="menu_shop">Tienda</string>
+    <string name="menu_high_score">Mejor puntaje: %1$d</string>
+    <string name="menu_coins">Monedas: %1$d</string>
+
+    <string name="game_score">Puntos: %1$d</string>
+    <string name="game_coins">Monedas: %1$d</string>
+    <string name="game_lives">Vidas: %1$d</string>
+    <string name="game_tap_hint">Toca la pantalla para saltar</string>
+
+    <string name="gameover_title">¡Juego terminado!</string>
+    <string name="gameover_score">Puntaje: %1$d</string>
+    <string name="gameover_new_record">¡Nuevo récord!</string>
+    <string name="gameover_coins_earned">Monedas ganadas: %1$d</string>
+    <string name="gameover_retry">Reintentar</string>
+    <string name="gameover_menu">Menú</string>
+    <string name="gameover_revive">Ver anuncio y continuar</string>
+    <string name="gameover_double_coins">Duplicar monedas (ver anuncio)</string>
+    <string name="gameover_double_coins_done">Monedas duplicadas</string>
+
+    <string name="shop_title">Tienda</string>
+    <string name="shop_tab_upgrades">Mejoras</string>
+    <string name="shop_tab_store">Tienda real</string>
+    <string name="shop_owned">Comprado</string>
+    <string name="shop_buy">Comprar (%1$d monedas)</string>
+    <string name="shop_not_enough_coins">Monedas insuficientes</string>
+    <string name="shop_back">Volver</string>
+
+    <string name="store_remove_ads_title">Quitar anuncios</string>
+    <string name="store_remove_ads_desc">Elimina los banners y anuncios entre partidas para siempre.</string>
+    <string name="store_coins_small_title">500 monedas</string>
+    <string name="store_coins_medium_title">1500 monedas</string>
+    <string name="store_coins_large_title">5000 monedas</string>
+    <string name="store_starter_pack_title">Pack de bienvenida</string>
+    <string name="store_starter_pack_desc">Quita anuncios + 1000 monedas + skin exclusiva.</string>
+    <string name="store_buy">Comprar</string>
+    <string name="store_purchased">Ya lo tienes</string>
+    <string name="store_loading">Cargando productos…</string>
+    <string name="store_price_unavailable">Precio no disponible</string>
+</resources>

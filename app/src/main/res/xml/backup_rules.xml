@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  No incluimos reglas personalizadas: el progreso del jugador vive en
+  DataStore local (app/src/main/java/.../data) y no contiene datos sensibles,
+  así que se permite el backup automático por defecto de Android.
+-->
+<full-backup-content />

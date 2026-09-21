@@ -71,14 +71,22 @@ en este orden de prioridad:
 
 ## Cómo correrlo (desarrollo)
 
+`mobile-child/` y `mobile-parent/` son proyectos de Android Studio
+completos (Gradle, manifest, recursos, código) — no solo código suelto.
+Guía paso a paso completa, incluyendo instalar Android Studio desde cero:
+[`SETUP.md`](./SETUP.md).
+
+Resumen rápido si ya tienes todo instalado:
+
 ```bash
-# Backend
+# Backend (requiere PostgreSQL corriendo)
 cd backend
 npm install
-npx prisma migrate dev
+cp .env.example .env   # completa DATABASE_URL y LOCATION_ENCRYPTION_KEY
+npx prisma db push
+npx prisma db seed     # crea una familia de prueba — apunta los IDs que imprime
 npm run start:dev
 
-# Apps móviles: abrir mobile-parent/ y mobile-child/ como proyectos de
-# Android Studio independientes (requieren SDK de Android, no incluido
-# en este entorno — ver notas en ARCHITECTURE.md).
+# Apps móviles: abrir mobile-child/ y mobile-parent/ como proyectos
+# independientes en Android Studio (cada una con su propio Gradle wrapper).
 ```

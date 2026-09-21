@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ControlFamiliar" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Tema de la pantalla de bloqueo por límite de tiempo: a pantalla
+         completa, sin barra de estado, para que el mensaje sea inequívoco. -->
+    <style name="Theme.BlockingOverlay" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

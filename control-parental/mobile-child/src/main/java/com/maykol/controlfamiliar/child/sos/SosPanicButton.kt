@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,8 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.maykol.controlfamiliar.child.network.ApiClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -32,7 +31,7 @@ import kotlinx.coroutines.tasks.await
 fun SosPanicButton(modifier: Modifier = Modifier) {
     var sending by remember { mutableStateOf(false) }
     var sent by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScopeSafe()
+    val scope = rememberCoroutineScope()
 
     Button(
         onClick = {
@@ -69,7 +68,3 @@ private suspend fun sendSosAlert() {
         message = "Botón de pánico activado por el menor",
     )
 }
-
-@Composable
-private fun rememberCoroutineScopeSafe(): CoroutineScope =
-    remember { CoroutineScope(Dispatchers.Main) }

@@ -7,6 +7,7 @@ import { GeofencingModule } from './modules/geofencing/geofencing.module';
 import { ScreenTimeModule } from './modules/screentime/screentime.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { UsageReportsModule } from './modules/usage-reports/usage-reports.module';
+import { FamilyModule } from './modules/family/family.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UsageReportsModule } from './modules/usage-reports/usage-reports.module
     ScreenTimeModule,
     AlertsModule,
     UsageReportsModule,
+    FamilyModule,
   ],
 })
 export class AppModule {}

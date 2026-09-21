@@ -3,6 +3,8 @@ package com.maykol.controlfamiliar.child.screentime
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import com.maykol.controlfamiliar.child.network.ApiClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 /**
@@ -34,7 +36,12 @@ class UsageStatsRepository(private val context: Context) {
     companion object {
         // Wrapper estático usado desde el AccessibilityService; en la app
         // real se inyecta el repositorio en vez de usar un singleton.
-        suspend fun minutesUsedToday(packageName: String): Long = 0L
+        suspend fun minutesUsedToday(packageName: String): Long {
+            val context = ApiClient.appContext ?: return 0L
+            return withContext(Dispatchers.Default) {
+                UsageStatsRepository(context).minutesUsedTodaySync(packageName)
+            }
+        }
 
         suspend fun reportSession(packageName: String, startedAtMs: Long, endedAtMs: Long) {
             runCatching {

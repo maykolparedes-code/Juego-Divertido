@@ -1,5 +1,6 @@
 package com.maykol.controlfamiliar.child.network
 
+import com.maykol.controlfamiliar.child.location.LocationPingRequest
 import org.json.JSONObject
 
 class LocationApi {

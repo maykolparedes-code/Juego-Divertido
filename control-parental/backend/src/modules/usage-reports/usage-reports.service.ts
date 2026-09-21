@@ -1,35 +1,57 @@
 import { Injectable } from '@nestjs/common';
+import { AppCategory } from '@prisma/client';
+import { PrismaService } from '../../common/prisma/prisma.service';
 
 interface UsageSessionInput {
   deviceId: string;
   appPackage: string;
-  category: string;
+  category: AppCategory;
   startedAt: Date;
   endedAt: Date;
 }
 
+const ALL_CATEGORIES: AppCategory[] = [
+  'EDUCATION',
+  'GAMES',
+  'SOCIAL',
+  'ENTERTAINMENT',
+  'PRODUCTIVITY',
+  'OTHER',
+];
+
 @Injectable()
 export class UsageReportsService {
+  constructor(private readonly prisma: PrismaService) {}
+
   async recordSession(input: UsageSessionInput) {
     const durationSeconds = Math.round(
       (input.endedAt.getTime() - input.startedAt.getTime()) / 1000,
     );
-    // Persistencia real: prisma.appUsageSession.create({ data: { ...input, durationSeconds } })
-    return { ...input, durationSeconds };
+    return this.prisma.appUsageSession.create({
+      data: { ...input, durationSeconds },
+    });
   }
 
   async getWeeklyReport(deviceId: string) {
-    // Implementación real: agregación SQL agrupando por categoría y día
-    // (prisma.appUsageSession.groupBy) sobre los últimos 7 días.
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const grouped = await this.prisma.appUsageSession.groupBy({
+      by: ['category'],
+      where: { deviceId, startedAt: { gte: weekAgo } },
+      _sum: { durationSeconds: true },
+    });
+
+    const minutesByCategory = new Map(
+      grouped.map((g) => [g.category, Math.round((g._sum.durationSeconds ?? 0) / 60)]),
+    );
+
     return {
       deviceId,
       range: 'week',
-      byCategory: [
-        { category: 'EDUCATION', minutes: 0 },
-        { category: 'GAMES', minutes: 0 },
-        { category: 'SOCIAL', minutes: 0 },
-        { category: 'ENTERTAINMENT', minutes: 0 },
-      ],
+      byCategory: ALL_CATEGORIES.map((category) => ({
+        category,
+        minutes: minutesByCategory.get(category) ?? 0,
+      })),
     };
   }
 }

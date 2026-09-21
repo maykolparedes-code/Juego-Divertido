@@ -1,11 +1,12 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { IsDateString, IsString } from 'class-validator';
+import { AppCategory } from '@prisma/client';
+import { IsDateString, IsEnum, IsString } from 'class-validator';
 import { UsageReportsService } from './usage-reports.service';
 
 class RecordSessionDto {
   @IsString() deviceId!: string;
   @IsString() appPackage!: string;
-  @IsString() category!: string;
+  @IsEnum(AppCategory) category!: AppCategory;
   @IsDateString() startedAt!: string;
   @IsDateString() endedAt!: string;
 }

@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { AppCategory } from '@prisma/client';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { ScreenTimeService } from './screentime.service';
 
 class CreateRuleDto {
   @IsString() familyId!: string;
   @IsOptional() @IsString() deviceId?: string;
   @IsOptional() @IsString() appPackage?: string;
-  @IsOptional() @IsString() category?: string;
+  @IsOptional() @IsEnum(AppCategory) category?: AppCategory;
   @IsInt() @Min(0) dailyLimitMinutes!: number;
   @IsOptional() @IsString() scheduleStart?: string;
   @IsOptional() @IsString() scheduleEnd?: string;

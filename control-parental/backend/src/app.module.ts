@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from './common/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { LocationModule } from './modules/location/location.module';
 import { GeofencingModule } from './modules/geofencing/geofencing.module';
@@ -10,6 +11,7 @@ import { UsageReportsModule } from './modules/usage-reports/usage-reports.module
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
     AuthModule,
     LocationModule,
     GeofencingModule,

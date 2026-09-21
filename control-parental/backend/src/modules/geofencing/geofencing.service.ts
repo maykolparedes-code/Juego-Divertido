@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { AlertsService } from '../alerts/alerts.service';
 
 interface CreateGeofenceInput {
@@ -18,16 +19,17 @@ interface GeofenceEventInput {
 
 @Injectable()
 export class GeofencingService {
-  constructor(private readonly alerts: AlertsService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly alerts: AlertsService,
+  ) {}
 
   async createGeofence(input: CreateGeofenceInput) {
-    // Persistencia real: prisma.geofence.create({ data: input })
-    return { ...input, id: 'generated-id' };
+    return this.prisma.geofence.create({ data: input });
   }
 
   async listGeofences(familyId: string) {
-    // Persistencia real: prisma.geofence.findMany({ where: { familyId } })
-    return [] as unknown[];
+    return this.prisma.geofence.findMany({ where: { familyId } });
   }
 
   /**
@@ -36,7 +38,13 @@ export class GeofencingService {
    * registra el evento y notifica al padre.
    */
   async recordEvent(input: GeofenceEventInput) {
-    // Persistencia real: prisma.geofenceEvent.create({ data: input })
+    await this.prisma.geofenceEvent.create({
+      data: {
+        geofenceId: input.geofenceId,
+        deviceId: input.deviceId,
+        type: input.type,
+      },
+    });
 
     await this.alerts.create({
       familyId: input.familyId,

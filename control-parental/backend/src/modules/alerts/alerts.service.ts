@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../common/prisma/prisma.service';
 import { PushService } from '../../common/push/push.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 
@@ -24,15 +25,22 @@ const ALERT_COPY: Record<CreateAlertInput['type'], { title: string; body: string
 @Injectable()
 export class AlertsService {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly push: PushService,
     private readonly encryption: EncryptionService,
   ) {}
 
   async create(input: CreateAlertInput) {
-    const encLat = input.lat != null ? this.encryption.encrypt(String(input.lat)) : undefined;
-    const encLng = input.lng != null ? this.encryption.encrypt(String(input.lng)) : undefined;
-
-    // Persistencia real: prisma.alert.create({ data: { ...input, encLat, encLng } })
+    const alert = await this.prisma.alert.create({
+      data: {
+        familyId: input.familyId,
+        deviceId: input.deviceId,
+        type: input.type,
+        message: input.message,
+        encLat: input.lat != null ? this.encryption.encrypt(String(input.lat)) : undefined,
+        encLng: input.lng != null ? this.encryption.encrypt(String(input.lng)) : undefined,
+      },
+    });
 
     const copy = ALERT_COPY[input.type];
     const parentPushTokens = await this.getParentPushTokens(input.familyId);
@@ -44,10 +52,17 @@ export class AlertsService {
         }),
       ),
     );
+
+    return alert;
   }
 
-  private async getParentPushTokens(_familyId: string): Promise<string[]> {
-    // Implementación real: prisma.device.findMany({ where: { family: { id }, owner: { role: 'PARENT' } } })
-    return [];
+  private async getParentPushTokens(familyId: string): Promise<string[]> {
+    const devices = await this.prisma.device.findMany({
+      where: { familyId, owner: { role: 'PARENT' } },
+      select: { pushToken: true },
+    });
+    return devices
+      .map((d) => d.pushToken)
+      .filter((token): token is string => Boolean(token));
   }
 }

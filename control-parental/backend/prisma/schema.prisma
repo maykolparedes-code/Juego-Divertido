@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PARENT
+  CHILD
+}
+
+enum AlertType {
+  SOS
+  GEOFENCE_ENTER
+  GEOFENCE_EXIT
+  SCREEN_TIME_LIMIT_REACHED
+}
+
+enum GeofenceEventType {
+  ENTER
+  EXIT
+}
+
+enum AppCategory {
+  EDUCATION
+  GAMES
+  SOCIAL
+  ENTERTAINMENT
+  PRODUCTIVITY
+  OTHER
+}
+
+model Family {
+  id           String    @id @default(uuid())
+  name         String
+  inviteCode   String    @unique
+  createdAt    DateTime  @default(now())
+
+  users        User[]
+  devices      Device[]
+  geofences    Geofence[]
+  screenTimeRules ScreenTimeRule[]
+  alerts       Alert[]
+}
+
+model User {
+  id           String    @id @default(uuid())
+  familyId     String
+  family       Family    @relation(fields: [familyId], references: [id])
+  role         UserRole
+  name         String
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+
+  devices      Device[]
+}
+
+model Device {
+  id           String    @id @default(uuid())
+  familyId     String
+  family       Family    @relation(fields: [familyId], references: [id])
+  ownerUserId  String
+  owner        User      @relation(fields: [ownerUserId], references: [id])
+  platform     String    // "ANDROID" | "IOS"
+  model        String?
+  pushToken    String?
+  lastSeenAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  locationPings   LocationPing[]
+  geofenceEvents  GeofenceEvent[]
+  usageSessions   AppUsageSession[]
+  alerts          Alert[]
+
+  @@index([familyId])
+}
+
+// lat/lng se guardan cifrados en reposo (ver EncryptionService); las
+// columnas son texto (payload cifrado en base64), no float, por eso el
+// prefijo "enc".
+model LocationPing {
+  id            String   @id @default(uuid())
+  deviceId      String
+  device        Device   @relation(fields: [deviceId], references: [id])
+  encLat        String
+  encLng        String
+  accuracyMeters Float
+  capturedAt    DateTime
+
+  @@index([deviceId, capturedAt])
+}
+
+model Geofence {
+  id            String   @id @default(uuid())
+  familyId      String
+  family        Family   @relation(fields: [familyId], references: [id])
+  name          String   // "Casa", "Colegio"
+  lat           Float
+  lng           Float
+  radiusMeters  Float
+  createdAt     DateTime @default(now())
+
+  events        GeofenceEvent[]
+
+  @@index([familyId])
+}
+
+model GeofenceEvent {
+  id            String   @id @default(uuid())
+  geofenceId    String
+  geofence      Geofence @relation(fields: [geofenceId], references: [id])
+  deviceId      String
+  device        Device   @relation(fields: [deviceId], references: [id])
+  type          GeofenceEventType
+  occurredAt    DateTime @default(now())
+
+  @@index([deviceId, occurredAt])
+}
+
+model ScreenTimeRule {
+  id                String   @id @default(uuid())
+  familyId          String
+  family            Family   @relation(fields: [familyId], references: [id])
+  deviceId          String?  // null = aplica a todos los dispositivos de la familia
+  appPackage        String?  // null = aplica a toda la categoría
+  category          AppCategory?
+  dailyLimitMinutes Int
+  scheduleStart     String?  // "22:00"
+  scheduleEnd       String?  // "07:00" (bloqueo nocturno)
+  createdAt         DateTime @default(now())
+
+  @@index([familyId])
+}
+
+model AppUsageSession {
+  id             String   @id @default(uuid())
+  deviceId       String
+  device         Device   @relation(fields: [deviceId], references: [id])
+  appPackage     String
+  category       AppCategory
+  startedAt      DateTime
+  endedAt        DateTime
+  durationSeconds Int
+
+  @@index([deviceId, startedAt])
+}
+
+model Alert {
+  id             String    @id @default(uuid())
+  familyId       String
+  family         Family    @relation(fields: [familyId], references: [id])
+  deviceId       String
+  device         Device    @relation(fields: [deviceId], references: [id])
+  type           AlertType
+  encLat         String?
+  encLng         String?
+  message        String?
+  createdAt      DateTime  @default(now())
+  acknowledgedAt DateTime?
+
+  @@index([familyId, createdAt])
+}

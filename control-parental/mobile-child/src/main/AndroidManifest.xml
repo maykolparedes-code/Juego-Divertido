@@ -28,6 +28,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Compartir pantalla BAJO PEDIDO (ver ScreenShareForegroundService):
+         android:foregroundServiceType="mediaProjection" exige este permiso
+         desde Android 14, y capturar un solo cuadro exige además el
+         diálogo de sistema de MediaProjection, que ni esta app ni el
+         backend pueden saltarse. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+
     <application
         android:name=".ControlFamiliarApp"
         android:label="Control Familiar"
@@ -61,6 +68,11 @@
             android:name=".location.LocationForegroundService"
             android:exported="false"
             android:foregroundServiceType="location" />
+
+        <service
+            android:name=".screenshare.ScreenShareForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
 
         <service
             android:name=".screentime.AppUsageAccessibilityService"

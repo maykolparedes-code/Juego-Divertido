@@ -8,6 +8,7 @@ import { ScreenTimeModule } from './modules/screentime/screentime.module';
 import { AlertsModule } from './modules/alerts/alerts.module';
 import { UsageReportsModule } from './modules/usage-reports/usage-reports.module';
 import { FamilyModule } from './modules/family/family.module';
+import { ScreenShareModule } from './modules/screenshare/screenshare.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { FamilyModule } from './modules/family/family.module';
     AlertsModule,
     UsageReportsModule,
     FamilyModule,
+    ScreenShareModule,
   ],
 })
 export class AppModule {}

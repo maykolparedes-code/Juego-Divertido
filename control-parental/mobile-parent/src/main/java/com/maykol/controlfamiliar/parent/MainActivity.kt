@@ -26,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maykol.controlfamiliar.parent.dashboard.ChildDeviceSummary
 import com.maykol.controlfamiliar.parent.dashboard.DashboardViewModel
 import com.maykol.controlfamiliar.parent.network.FamilySession
+import com.maykol.controlfamiliar.parent.screenshare.ScreenShareViewerScreen
 
 /**
  * Pantalla principal del padre: ingresa el familyId (impreso por
@@ -72,16 +73,30 @@ private fun DashboardScreen(viewModel: DashboardViewModel = viewModel()) {
         state.error?.let { Text("Error: $it") }
 
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(state.childDevices) { child -> ChildSummaryRow(child) }
+            items(state.childDevices) { child -> ChildSummaryRow(familyId = familyId, child = child) }
         }
     }
 }
 
 @Composable
-private fun ChildSummaryRow(child: ChildDeviceSummary) {
+private fun ChildSummaryRow(familyId: String, child: ChildDeviceSummary) {
+    var showScreenShare by remember { mutableStateOf(false) }
+
     Column {
         Text(child.childName, style = MaterialTheme.typography.titleMedium)
         Text("Uso hoy: ${child.minutesUsedToday} min · categoría principal: ${child.topCategory}")
         Text(if (child.insideSafeZone) "Dentro de una zona segura" else "Fuera de zonas seguras")
+
+        Button(onClick = { showScreenShare = !showScreenShare }) {
+            Text(if (showScreenShare) "Ocultar pantalla" else "Ver pantalla en vivo")
+        }
+
+        if (showScreenShare) {
+            ScreenShareViewerScreen(
+                familyId = familyId,
+                deviceId = child.deviceId,
+                childName = child.childName,
+            )
+        }
     }
 }

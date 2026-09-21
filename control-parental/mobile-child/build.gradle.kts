@@ -75,6 +75,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
+    // Canal en tiempo real para compartir pantalla bajo pedido
+    implementation("io.socket:socket.io-client:2.1.1") {
+        exclude(group = "org.json", module = "json")
+    }
+
     testImplementation("junit:junit:4.13.2")
 
     debugImplementation("androidx.compose.ui:ui-tooling")

@@ -149,7 +149,44 @@ series agregadas para las gráficas del dashboard.
   previa propia que explica, en lenguaje simple, para qué se usa —
   adicional a los diálogos del sistema operativo, nunca en su lugar.
 
-## 9. Por qué no hay política de privacidad "porque es de uso particular"
+## 9. Compartir pantalla — bajo pedido, nunca automático
+
+Igual que la ubicación (§4), esta función se diseñó para que sea
+**imposible** activarla sin que el menor lo sepa y decida — no por buena
+voluntad del código, sino porque Android mismo lo exige en cada paso:
+
+1. El padre pide ver la pantalla desde `mobile-parent`
+   (`ScreenShareViewerScreen.kt`). El backend (`screenshare.gateway.ts`)
+   solo reenvía ese pedido por WebSocket a la familia — nunca autoriza
+   nada por su cuenta, es un simple relé entre dos consentimientos.
+2. El menor ve un diálogo propio de la app
+   (`MainActivity.kt` en `mobile-child`) explicando qué está pidiendo su
+   familia, con botones **Aceptar** / **Rechazar**. Si rechaza, ahí
+   termina — el backend nunca ve un solo cuadro.
+3. Si acepta, Android exige un **segundo consentimiento que esta app no
+   puede saltarse ni pre-aprobar**: el diálogo de sistema de
+   `MediaProjectionManager` ("¿Empezar a grabar o transmitir?"). Sin ese
+   "Sí" del propio sistema operativo, no se puede crear ni un solo
+   `VirtualDisplay`.
+4. Mientras dura, `ScreenShareForegroundService` corre como foreground
+   service tipo `mediaProjection`, con la notificación persistente
+   obligatoria de Android ("Compartiendo pantalla en vivo") y un botón
+   **Detener** tanto ahí como en la app — el menor corta la sesión cuando
+   quiera, no solo al principio.
+
+**Limitación honesta de este scaffold**: los "cuadros" que viajan por
+`screen-share:frame` son capturas JPEG periódicas (≈1 por segundo), no un
+video continuo de baja latencia — suficiente para supervisión puntual
+("¿qué está viendo ahora mismo?"), no para ver algo que se mueve rápido
+con fluidez. Implementarlo así fue una decisión deliberada: no requiere
+infraestructura adicional (señalización WebRTC, servidores STUN/TURN,
+la librería nativa de WebRTC en Android) y es auditable con una lectura
+simple del código. Si en el futuro se necesita video real, la ruta
+recomendada es migrar `screen-share:frame` a una sesión WebRTC completa
+manteniendo exactamente el mismo flujo de doble consentimiento descrito
+arriba — eso no cambia.
+
+## 10. Por qué no hay política de privacidad "porque es de uso particular"
 
 Aun sin publicarse en una tienda de apps, si vas a operar esto con datos
 reales de una persona (aunque sea tu hijo/a) recomendamos igualmente

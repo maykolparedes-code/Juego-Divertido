@@ -58,5 +58,12 @@ private fun PrivacyExplanationScreen() {
             "Botón SOS: si lo usas, se envía tu ubicación exacta y una " +
                 "alerta inmediata a tu familia.",
         )
+        Text(
+            "Compartir pantalla: tu familia puede pedirte ver tu pantalla en " +
+                "tiempo real. Vas a ver un aviso para aceptar o rechazar cada " +
+                "vez, y si aceptas, Android te va a pedir confirmarlo una vez " +
+                "más. Mientras dure, vas a ver un aviso fijo con un botón para " +
+                "detenerlo cuando quieras — nunca se activa sin que lo sepas.",
+        )
     }
 }

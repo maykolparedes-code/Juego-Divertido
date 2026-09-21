@@ -5,7 +5,7 @@ extends Node
 ## (una escena normal, no un --script MainLoop, para que los autoloads
 ## como GameState/DialogueService se inicialicen igual que en el juego real)
 ##
-## Instancia World.tscn de verdad y simula una partida completa (hablar con
+## Instancia Level1.tscn de verdad y simula una partida completa (hablar con
 ## el NPC, recolectar los 3 cristales, volver, comprobar que la puerta se
 ## abre) para detectar errores de cableado (rutas de nodos, señales, estado)
 ## que un simple chequeo de "no crashea al cargar" no detectaría.
@@ -22,7 +22,7 @@ func _run_impl() -> void:
 	# estado para que esta prueba parta siempre de cero.
 	GameState.reset_progress()
 
-	var world_scene: PackedScene = load("res://scenes/World.tscn")
+	var world_scene: PackedScene = load("res://scenes/Level1.tscn")
 	var world: Node = world_scene.instantiate()
 	get_tree().root.add_child.call_deferred(world)
 	await get_tree().process_frame
@@ -36,18 +36,18 @@ func _run_impl() -> void:
 	var player: Node = world.get_node_or_null("Player")
 	var touch_controls: Node = world.get_node_or_null("TouchControls")
 
-	_check(hud != null, "El nodo HUD existe en World.tscn")
-	_check(gate != null, "El nodo Gate existe en World.tscn")
-	_check(npc != null, "El nodo NPC existe en World.tscn")
-	_check(dialogue_box != null, "El nodo DialogueBox existe en World.tscn")
-	_check(player != null, "El nodo Player existe en World.tscn")
-	_check(touch_controls != null, "El nodo TouchControls existe en World.tscn")
+	_check(hud != null, "El nodo HUD existe en Level1.tscn")
+	_check(gate != null, "El nodo Gate existe en Level1.tscn")
+	_check(npc != null, "El nodo NPC existe en Level1.tscn")
+	_check(dialogue_box != null, "El nodo DialogueBox existe en Level1.tscn")
+	_check(player != null, "El nodo Player existe en Level1.tscn")
+	_check(touch_controls != null, "El nodo TouchControls existe en Level1.tscn")
 
 	if hud == null or gate == null or npc == null or dialogue_box == null or player == null or touch_controls == null:
 		_finish()
 		return
 
-	# Regresión: Player aparece antes que TouchControls en World.tscn, así que
+	# Regresión: Player aparece antes que TouchControls en Level1.tscn, así que
 	# en su primer _ready() el grupo "touch_controls" todavía está vacío. Si
 	# la búsqueda de TouchControls solo ocurriera una vez en _ready() (en vez
 	# de reintentarse hasta encontrarlo), el jugador quedaría sordo a todo
@@ -117,7 +117,73 @@ func _run_impl() -> void:
 		"La puerta se mueve hacia arriba al completarse la misión (y pasó de %.2f a %.2f)" % [gate_start_y, gate.position.y])
 	_check(gate_collision.disabled, "La colisión de la puerta se desactiva al abrirse")
 
+	# Libera el Nivel 1 antes de cargar el Nivel 2, para que no queden dos
+	# jugadores/TouchControls a la vez compitiendo por los mismos grupos.
+	world.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	await _test_level2()
+
 	_finish()
+
+## Chequeo más liviano del Nivel 2: no repite toda la partida (eso ya lo
+## prueba a fondo el Nivel 1 con el mismo código compartido), solo confirma
+## que la escena está bien armada y que el ciclo de misión también funciona
+## ahí, ya con su propio NPC/diálogo/cristales/puerta.
+func _test_level2() -> void:
+	GameState.start_new_level(1)
+
+	var level2_scene: PackedScene = load("res://scenes/Level2.tscn")
+	var level2: Node = level2_scene.instantiate()
+	get_tree().root.add_child.call_deferred(level2)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+	var hud: Node = level2.get_node_or_null("HUD")
+	var gate: Node3D = level2.get_node_or_null("Gate")
+	var npc: Node = level2.get_node_or_null("NPC")
+	var dialogue_box: Node = level2.get_node_or_null("DialogueBox")
+	var player: Node = level2.get_node_or_null("Player")
+	var touch_controls: Node = level2.get_node_or_null("TouchControls")
+
+	_check(hud != null, "El nodo HUD existe en Level2.tscn")
+	_check(gate != null, "El nodo Gate existe en Level2.tscn")
+	_check(npc != null, "El nodo NPC existe en Level2.tscn")
+	_check(dialogue_box != null, "El nodo DialogueBox existe en Level2.tscn")
+	_check(player != null, "El nodo Player existe en Level2.tscn")
+	_check(touch_controls != null, "El nodo TouchControls existe en Level2.tscn")
+
+	if hud == null or gate == null or npc == null or dialogue_box == null:
+		return
+
+	var continue_button: Button = dialogue_box.get_node("Panel/MarginContainer/VBoxContainer/ContinueButton")
+	var gate_collision: CollisionShape3D = gate.get_node("CollisionShape3D")
+
+	npc.interact()
+	await get_tree().process_frame
+	await _advance_dialogue(dialogue_box, continue_button)
+	_check(GameState.quest_stage == GameState.QuestStage.COLLECTING,
+		"Nivel 2: tras hablar con el Sabio la misión pasa a COLLECTING")
+
+	GameState.add_crystal()
+	GameState.add_crystal()
+	GameState.add_crystal()
+	await get_tree().process_frame
+	_check(GameState.quest_stage == GameState.QuestStage.READY_TO_RETURN,
+		"Nivel 2: las 3 gemas completan la recolección")
+
+	npc.interact()
+	await get_tree().process_frame
+	await _advance_dialogue(dialogue_box, continue_button)
+	_check(GameState.quest_stage == GameState.QuestStage.COMPLETE,
+		"Nivel 2: la segunda conversación completa la misión")
+
+	var gate_start_y: float = gate.position.y
+	await get_tree().create_timer(1.5).timeout
+	_check(gate.position.y > gate_start_y + 2.0, "Nivel 2: la puerta también se abre al completar la misión")
+	_check(gate_collision.disabled, "Nivel 2: la colisión de la puerta se desactiva")
 
 func _advance_dialogue(dialogue_box: Node, continue_button: Button) -> void:
 	var guard := 0

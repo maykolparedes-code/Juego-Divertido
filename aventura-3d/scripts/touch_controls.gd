@@ -7,16 +7,19 @@ extends CanvasLayer
 
 signal look_delta(delta: Vector2)
 signal jump_pressed
+signal attack_pressed
 
 @onready var joystick: Control = $Joystick
 @onready var camera_drag_area: Control = $CameraDragArea
 @onready var jump_button: Button = $JumpButton
+@onready var attack_button: Button = $AttackButton
 @onready var interact_button: Button = $InteractButton
 
 func _ready() -> void:
 	add_to_group("touch_controls")
 	camera_drag_area.look_delta.connect(func(delta: Vector2) -> void: look_delta.emit(delta))
 	jump_button.pressed.connect(func() -> void: jump_pressed.emit())
+	attack_button.pressed.connect(func() -> void: attack_pressed.emit())
 	interact_button.pressed.connect(_on_interact_pressed)
 	interact_button.visible = false
 	GameState.nearby_interactable_changed.connect(_on_nearby_interactable_changed)

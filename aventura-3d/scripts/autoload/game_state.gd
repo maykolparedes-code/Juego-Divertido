@@ -16,6 +16,8 @@ const SAVE_PATH := "user://savegame.json"
 var crystals_collected: int = 0
 var quest_stage: int = QuestStage.NOT_STARTED
 var nearby_interactable: Node = null
+var current_level_index: int = 0
+var highest_level_reached: int = 0
 
 func _ready() -> void:
 	load_game()
@@ -50,12 +52,29 @@ func clear_nearby_interactable(interactable: Node) -> void:
 func reset_progress() -> void:
 	crystals_collected = 0
 	quest_stage = QuestStage.NOT_STARTED
+	current_level_index = 0
+	highest_level_reached = 0
+	save_game()
+
+## Llamado por LevelManager al entrar a un nivel nuevo: la misión (hablar,
+## recolectar, volver) es propia de cada nivel y arranca de cero, pero
+## highest_level_reached se conserva para saber hasta dónde llegó el jugador.
+func start_new_level(level_index: int) -> void:
+	crystals_collected = 0
+	quest_stage = QuestStage.NOT_STARTED
+	current_level_index = level_index
+	if level_index > highest_level_reached:
+		highest_level_reached = level_index
+	quest_stage_changed.emit(quest_stage)
+	crystals_changed.emit(crystals_collected)
 	save_game()
 
 func save_game() -> void:
 	var data := {
 		"crystals_collected": crystals_collected,
 		"quest_stage": quest_stage,
+		"current_level_index": current_level_index,
+		"highest_level_reached": highest_level_reached,
 	}
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
@@ -74,3 +93,5 @@ func load_game() -> void:
 	if typeof(parsed) == TYPE_DICTIONARY:
 		crystals_collected = int(parsed.get("crystals_collected", 0))
 		quest_stage = int(parsed.get("quest_stage", QuestStage.NOT_STARTED))
+		current_level_index = int(parsed.get("current_level_index", 0))
+		highest_level_reached = int(parsed.get("highest_level_reached", 0))

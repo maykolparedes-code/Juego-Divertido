@@ -11,6 +11,7 @@ const RESPAWN_Y := -15.0
 const WALK_ANIM_SPEED := 8.0
 const IDLE_ANIM_SPEED := 2.0
 const LIMB_RETURN_SPEED := 5.0
+const ATTACK_DURATION := 0.35
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
@@ -26,12 +27,14 @@ var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _walk_time := 0.0
 var _idle_time := 0.0
 var _spawn_position: Vector3
+var _attacking := false
+var _attack_time := 0.0
 
 func _ready() -> void:
 	add_to_group("player")
 	_spawn_position = global_position
 
-	visuals = CharacterBuilder.build(Color(0.20, 0.55, 0.95), Color(0.15, 0.35, 0.75))
+	visuals = CharacterBuilder.build_prince()
 	add_child(visuals)
 	_left_arm = visuals.get_node("LeftArmPivot")
 	_right_arm = visuals.get_node("RightArmPivot")
@@ -53,6 +56,7 @@ func _connect_touch_controls() -> void:
 	if _touch_controls:
 		_touch_controls.look_delta.connect(_on_look_delta)
 		_touch_controls.jump_pressed.connect(_on_jump_pressed)
+		_touch_controls.attack_pressed.connect(_on_attack_pressed)
 
 func _physics_process(delta: float) -> void:
 	if _touch_controls == null:
@@ -93,12 +97,26 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
+	if Input.is_action_just_pressed("attack"):
+		_on_attack_pressed()
+
+	if _attacking:
+		_attack_time += delta
+		if _attack_time >= ATTACK_DURATION:
+			_attacking = false
+
 	move_and_slide()
 	_animate(delta, is_moving)
 
 func _on_jump_pressed() -> void:
 	if is_on_floor():
 		velocity.y = JUMP_VELOCITY
+
+func _on_attack_pressed() -> void:
+	if _attacking:
+		return
+	_attacking = true
+	_attack_time = 0.0
 
 func _on_look_delta(delta: Vector2) -> void:
 	camera_pivot.rotation.y -= delta.x * CAMERA_YAW_SPEED
@@ -109,7 +127,6 @@ func _animate(delta: float, is_moving: bool) -> void:
 		_walk_time += delta * WALK_ANIM_SPEED
 		var swing := sin(_walk_time) * 0.6
 		_left_arm.rotation.x = swing
-		_right_arm.rotation.x = -swing
 		_left_leg.rotation.x = -swing
 		_right_leg.rotation.x = swing
 		visuals.position.y = absf(sin(_walk_time)) * 0.03
@@ -117,9 +134,19 @@ func _animate(delta: float, is_moving: bool) -> void:
 		_idle_time += delta * IDLE_ANIM_SPEED
 		visuals.position.y = sin(_idle_time) * 0.02
 		_left_arm.rotation.x = lerp(_left_arm.rotation.x, 0.0, delta * LIMB_RETURN_SPEED)
-		_right_arm.rotation.x = lerp(_right_arm.rotation.x, 0.0, delta * LIMB_RETURN_SPEED)
 		_left_leg.rotation.x = lerp(_left_leg.rotation.x, 0.0, delta * LIMB_RETURN_SPEED)
 		_right_leg.rotation.x = lerp(_right_leg.rotation.x, 0.0, delta * LIMB_RETURN_SPEED)
+
+	# El brazo derecho (el de la espada) sigue el ciclo de caminar/idle
+	# normal, salvo mientras dura el golpe de espada, que lo controla por
+	# su cuenta con un arco rápido de ida y vuelta.
+	if _attacking:
+		var t: float = _attack_time / ATTACK_DURATION
+		_right_arm.rotation.x = -sin(t * PI) * 1.9
+	elif is_moving:
+		_right_arm.rotation.x = -sin(_walk_time) * 0.6
+	else:
+		_right_arm.rotation.x = lerp(_right_arm.rotation.x, 0.0, delta * LIMB_RETURN_SPEED)
 
 func _respawn() -> void:
 	global_position = _spawn_position

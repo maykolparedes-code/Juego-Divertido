@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  App del menor. El ícono, el nombre ("Control Familiar") y todas las
+  notificaciones del sistema permanecen SIEMPRE visibles: no se declara
+  android:excludeFromRecents, no se usa un LAUNCHER alias oculto, y no se
+  suprime ninguna notificación obligatoria del SO. Eso es intencional, no
+  un descuido — ver control-parental/README.md.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.maykol.controlfamiliar.child">
+
+    <!-- Ubicación: foreground (mientras se usa) + background (para el
+         servicio continuo, que SIEMPRE corre con notificación persistente,
+         ver LocationForegroundService). -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Tiempo de pantalla y bloqueo de apps -->
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Compartir pantalla BAJO PEDIDO (ver ScreenShareForegroundService):
+         android:foregroundServiceType="mediaProjection" exige este permiso
+         desde Android 14, y capturar un solo cuadro exige además el
+         diálogo de sistema de MediaProjection, que ni esta app ni el
+         backend pueden saltarse. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+
+    <application
+        android:name=".ControlFamiliarApp"
+        android:label="Control Familiar"
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:allowBackup="false">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="Control Familiar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".onboarding.PermissionOnboardingActivity"
+            android:exported="false"
+            android:label="Qué comparte esta app" />
+
+        <activity
+            android:name=".screentime.BlockingOverlayActivity"
+            android:exported="false"
+            android:theme="@style/Theme.BlockingOverlay"
+            android:label="Tiempo de pantalla" />
+
+        <service
+            android:name=".location.LocationForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+        <service
+            android:name=".screenshare.ScreenShareForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
+
+        <service
+            android:name=".screentime.AppUsageAccessibilityService"
+            android:exported="false"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
+        </service>
+
+        <receiver
+            android:name=".geofencing.GeofenceBroadcastReceiver"
+            android:exported="false" />
+
+        <receiver
+            android:name=".BootCompletedReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

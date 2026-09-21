@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícono provisional del launcher: un escudo simple. Reemplazar con arte
+     final usando el asistente "Image Asset" de Android Studio antes de
+     instalar en un dispositivo real. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,20 L80,30 L80,54 C80,72 68,84 54,90 C40,84 28,72 28,54 L28,30 Z" />
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M54,28 L74,36 L74,54 C74,68 65,77 54,82 C43,77 34,68 34,54 L34,36 Z" />
+</vector>

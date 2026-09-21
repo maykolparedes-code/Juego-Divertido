@@ -12,6 +12,7 @@ local.properties
 .idea/*
 !.idea/codeStyles
 !.idea/runConfigurations.xml
+**/.idea/
 *.hprof
 
 # Gradle build outputs
@@ -30,3 +31,14 @@ key.properties
 
 # OS files
 Thumbs.db
+
+# Node (control-parental/backend)
+node_modules/
+dist/
+*.env
+.env.*
+!.env.example
+
+# Firebase (control-parental/mobile-parent) — cada quien agrega el suyo,
+# ver control-parental/SETUP.md
+google-services.json

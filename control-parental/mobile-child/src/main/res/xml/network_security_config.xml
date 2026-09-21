@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  El backend real debe usar HTTPS (ver ARCHITECTURE.md). Esta excepción
+  de texto plano existe solo para 10.0.2.2 (el alias de "localhost" del
+  host visto desde el emulador de Android Studio), para poder probar
+  contra un backend local en desarrollo sin exponer tráfico sin cifrar
+  hacia ningún otro destino.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

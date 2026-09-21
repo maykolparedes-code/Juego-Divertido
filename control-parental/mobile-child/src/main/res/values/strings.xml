@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Control Familiar</string>
+    <string name="accessibility_service_description">Control Familiar usa este servicio solo para saber qué aplicación tienes abierta (no lee el contenido de tu pantalla) y así avisarte cuando llegues al límite de tiempo que tus padres configuraron.</string>
+</resources>

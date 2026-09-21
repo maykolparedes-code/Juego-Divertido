@@ -30,3 +30,10 @@ key.properties
 
 # OS files
 Thumbs.db
+
+# Node (control-parental/backend)
+node_modules/
+dist/
+*.env
+.env.*
+!.env.example

@@ -2,7 +2,7 @@
 <!-- Ícono provisional del launcher. Reemplazar con arte final antes de
      instalar en un dispositivo real (asistente "Image Asset" de Android
      Studio). -->
-<vector xmlns:android="http://schemas.android.com/apk/res/vector"
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
